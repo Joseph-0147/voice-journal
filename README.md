@@ -8,7 +8,7 @@ Echo combines the mental health benefits of daily reflection with the shareable,
 
 ## 👥 Target Audience
 
-Young professionals (25-35) and students who:
+Young professionals (18-35) and students who:
 - Are comfortable with audio-based social media
 - Are interested in mindfulness and self-improvement
 - Find traditional journaling tedious or time-consuming
