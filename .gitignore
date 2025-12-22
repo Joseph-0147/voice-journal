@@ -1,0 +1,238 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Backend
+backend/.env
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/logs/
+backend/*.log
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+
+# Mobile
+mobile/.env
+mobile/node_modules/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/build/
+
+# iOS
+mobile/ios/build/
+mobile/ios/Pods/
+mobile/ios/.xcode.env.local
+mobile/ios/DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+mobile/ios/*.xcworkspace/xcuserdata/
+mobile/ios/*.xcodeproj/xcuserdata/
+mobile/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Android
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/.cxx/
+mobile/android/local.properties
+mobile/android/captures/
+*.apk
+*.ap_
+*.aab
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+*.DS_Store
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Audio Files (development only)
+*.m4a
+*.mp3
+*.wav
+*.mp4
+*.webm
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Certificates and Keys
+*.pem
+*.key
+*.cert
+*.p12
+*.mobileprovision
+
+# Temporary Files
+tmp/
+temp/
+.tmp/
+.cache/
+
+# React Native
+mobile/.buckconfig.local
+mobile/.buckd/
+mobile/buck-out/
+mobile/.bundle/
+
+# Metro Bundler
+mobile/.metro-health-check*
+
+# Fastlane (iOS/Android deployment)
+mobile/ios/fastlane/report.xml
+mobile/ios/fastlane/Preview.html
+mobile/ios/fastlane/screenshots
+mobile/ios/fastlane/test_output
+mobile/android/fastlane/report.xml
+mobile/android/fastlane/Preview.html
+mobile/android/fastlane/screenshots
+mobile/android/fastlane/test_output
+
+# CocoaPods (iOS)
+mobile/ios/Podfile.lock
+
+# Gradle (Android)
+mobile/android/gradle/
+mobile/android/.gradle/
+mobile/android/gradlew
+mobile/android/gradlew.bat
+
+# Jest
+jest.config.js
+jest.setup.js
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Yarn
+yarn-error.log
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Parcel
+.parcel-cache
+
+# Next.js
+.next
+out
+
+# Nuxt.js
+.nuxt
+dist
+
+# Gatsby
+.cache/
+public
+
+# Serverless
+.serverless/
+.webpack/
+
+# FuseBox
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# TernJS
+.tern-port
+
+# VSCode
+.history/
+
+# Webpack
+.webpack/
+
+# Storybook
+.out
+.storybook-out
+
+# Local development files
+.local
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Backups
+*.backup
+*.bak
+*.gho
+*.ori
+*.orig
+*.tmp
