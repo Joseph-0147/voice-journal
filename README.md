@@ -198,4 +198,4 @@ Contributions are welcome! Please read CONTRIBUTING.md for guidelines.
 
 ## 📧 Contact
 
-For questions or support, please contact: [joekiki011@.com]
+For questions or support, please contact: [joekiki011@gmail.com]
