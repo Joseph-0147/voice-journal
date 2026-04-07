@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
+import RNFS from 'react-native-fs';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 

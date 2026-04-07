@@ -139,10 +139,7 @@ mobile/android/fastlane/test_output
 mobile/ios/Podfile.lock
 
 # Gradle (Android)
-mobile/android/gradle/
 mobile/android/.gradle/
-mobile/android/gradlew
-mobile/android/gradlew.bat
 
 # Jest
 jest.config.js

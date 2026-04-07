@@ -7,6 +7,10 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "android:release": "cd android && gradlew bundleRelease",
+    "android:apk:release": "cd android && gradlew assembleRelease",
+    "ios:pods": "cd ios && pod install",
+    "ios:archive": "xcodebuild -workspace ios/EchoNativeScaffold.xcworkspace -scheme EchoNativeScaffold -configuration Release -sdk iphoneos -archivePath ios/build/Echo.xcarchive archive",
     "test": "jest",
     "lint": "eslint ."
   },
