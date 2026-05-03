@@ -11,10 +11,11 @@ const userRoutes = require('./routes/users');
 const journalRoutes = require('./routes/journals');
 const insightsRoutes = require('./routes/insights');
 const audioRoutes = require('./routes/audio');
+const path = require('path');
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(helmet()); // Security headers
@@ -25,6 +26,7 @@ app.use(cors({
 app.use(morgan('dev')); // Logging
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Rate limiting
 const limiter = rateLimit({

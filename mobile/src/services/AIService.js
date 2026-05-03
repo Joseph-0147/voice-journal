@@ -1,60 +1,103 @@
 import axios from 'axios';
+import RNFS from 'react-native-fs';
 
 // API Configuration
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'your-api-key-here';
-const OPENAI_API_BASE_URL = 'https://api.openai.com/v1';
+const GEMINI_API_KEY =
+  process.env.GEMINI_API_KEY ||
+  process.env.EXPO_PUBLIC_GEMINI_API_KEY ||
+  'your-gemini-api-key-here';
+const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
+const GEMINI_TEXT_MODEL =
+  process.env.GEMINI_TEXT_MODEL ||
+  process.env.EXPO_PUBLIC_GEMINI_TEXT_MODEL ||
+  'gemini-2.5-flash';
+const GEMINI_AUDIO_MODEL =
+  process.env.GEMINI_AUDIO_MODEL ||
+  process.env.EXPO_PUBLIC_GEMINI_AUDIO_MODEL ||
+  GEMINI_TEXT_MODEL;
 
 /**
  * AI Service for Echo App
- * Handles transcription and analysis of audio journal entries using OpenAI APIs
+ * Handles transcription and analysis of audio journal entries using Gemini APIs
  */
 
 class AIService {
   constructor() {
-    this.apiKey = OPENAI_API_KEY;
-    this.baseURL = OPENAI_API_BASE_URL;
+    this.apiKey = GEMINI_API_KEY;
+    this.baseURL = GEMINI_API_BASE_URL;
+  }
+
+  getGeminiUrl(path) {
+    return `${this.baseURL}${path}?key=${this.apiKey}`;
+  }
+
+  stripFileScheme(filePath) {
+    return filePath.startsWith('file://') ? filePath.replace('file://', '') : filePath;
+  }
+
+  getAudioMimeType(filePath) {
+    const lowerPath = filePath.toLowerCase();
+
+    if (lowerPath.endsWith('.mp3')) return 'audio/mpeg';
+    if (lowerPath.endsWith('.wav')) return 'audio/wav';
+    if (lowerPath.endsWith('.aac')) return 'audio/aac';
+    if (lowerPath.endsWith('.m4a')) return 'audio/m4a';
+    if (lowerPath.endsWith('.mp4')) return 'audio/mp4';
+
+    return 'audio/m4a';
   }
 
   /**
-   * Transcribe audio using OpenAI Whisper API
+   * Transcribe audio using Gemini multimodal generation
    * @param {string} audioFilePath - Path or URL to the audio file
    * @param {string} language - Optional language code (e.g., 'en')
    * @returns {Promise<Object>} Transcription result
    */
   async transcribeAudio(audioFilePath, language = 'en') {
     try {
-      const formData = new FormData();
-      formData.append('file', {
-        uri: audioFilePath,
-        type: 'audio/m4a',
-        name: 'recording.m4a',
-      });
-      formData.append('model', 'whisper-1');
-      
-      if (language) {
-        formData.append('language', language);
-      }
-
-      // Optional: Add timestamps for milestone detection
-      formData.append('timestamp_granularities[]', 'word');
-      formData.append('response_format', 'verbose_json');
+      const localPath = this.stripFileScheme(audioFilePath);
+      const base64Audio = await RNFS.readFile(localPath, 'base64');
+      const mimeType = this.getAudioMimeType(localPath);
 
       const response = await axios.post(
-        `${this.baseURL}/audio/transcriptions`,
-        formData,
+        this.getGeminiUrl(`/models/${GEMINI_AUDIO_MODEL}:generateContent`),
         {
-          headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'multipart/form-data',
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `Transcribe this audio journal entry verbatim. ${language ? `The spoken language is ${language}.` : ''} Return only the transcript text.`,
+                },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: base64Audio,
+                  },
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: 0,
           },
         }
       );
 
+      const transcript = response.data?.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text || '')
+        .join('')
+        .trim();
+
+      if (!transcript) {
+        throw new Error('Gemini did not return a transcript');
+      }
+
       return {
         success: true,
-        transcript: response.data.text,
-        words: response.data.words || [], // Word-level timestamps
-        duration: response.data.duration,
+        transcript,
+        words: [],
+        duration: null,
       };
     } catch (error) {
       console.error('Transcription error:', error);
@@ -66,7 +109,7 @@ class AIService {
   }
 
   /**
-   * Analyze journal entry transcript using GPT-4
+   * Analyze journal entry transcript using Gemini
    * Extracts action items, milestones, sentiment, and themes
    * @param {string} transcript - The transcribed text
    * @param {Array} wordTimestamps - Optional word-level timestamps
@@ -77,32 +120,39 @@ class AIService {
       const prompt = this.buildAnalysisPrompt(transcript);
 
       const response = await axios.post(
-        `${this.baseURL}/chat/completions`,
+        this.getGeminiUrl(`/models/${GEMINI_TEXT_MODEL}:generateContent`),
         {
-          model: 'gpt-4-turbo-preview',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an AI assistant specialized in analyzing personal journal entries. You help users extract actionable insights, identify key moments, and understand emotional patterns in their reflections. Always respond with valid JSON in the exact format requested.',
-            },
+          systemInstruction: {
+            parts: [
+              {
+                text: 'You are an AI assistant specialized in analyzing personal journal entries. You help users extract actionable insights, identify key moments, and understand emotional patterns in their reflections. Always respond with valid JSON in the exact format requested.',
+              },
+            ],
+          },
+          contents: [
             {
               role: 'user',
-              content: prompt,
+              parts: [{ text: prompt }],
             },
           ],
-          response_format: { type: 'json_object' },
-          temperature: 0.7,
-          max_tokens: 2000,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2000,
+            responseMimeType: 'application/json',
           },
         }
       );
 
-      const analysis = JSON.parse(response.data.choices[0].message.content);
+      const analysisText = response.data?.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text || '')
+        .join('')
+        .trim();
+
+      if (!analysisText) {
+        throw new Error('Gemini did not return analysis output');
+      }
+
+      const analysis = JSON.parse(analysisText);
 
       // Enhance milestones with timestamps if available
       if (wordTimestamps.length > 0) {
@@ -252,6 +302,13 @@ Return ONLY the JSON object, no additional text or markdown formatting.`;
    */
   async processJournalEntry(audioFilePath, options = {}) {
     try {
+      if (!this.apiKey || this.apiKey === 'your-gemini-api-key-here') {
+        return {
+          success: false,
+          error: 'Gemini API key is not configured',
+        };
+      }
+
       // Step 1: Transcribe audio
       console.log('Transcribing audio...');
       const transcriptionResult = await this.transcribeAudio(
