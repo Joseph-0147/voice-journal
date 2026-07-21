@@ -5,11 +5,33 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuthStore } from '@/store/authStore';
 import { Settings as SettingsIcon, Bell, Shield, Palette, Mic, HelpCircle, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getStoredTheme, setThemeMode, ThemeMode } from '@/lib/theme';
+
+interface SettingsState {
+  notifications: {
+    dailyReminder: boolean;
+    weeklyReport: boolean;
+    achievementAlerts: boolean;
+  };
+  privacy: {
+    profileVisibility: 'private' | 'friends' | 'public';
+    dataSharing: boolean;
+  };
+  audio: {
+    autoSave: boolean;
+    maxDuration: number;
+    quality: 'low' | 'medium' | 'high';
+  };
+  appearance: {
+    theme: ThemeMode;
+    accentColor: string;
+  };
+}
 
 export default function SettingsPage() {
   const router = useRouter();
   const { token, logout } = useAuthStore();
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<SettingsState>({
     notifications: {
       dailyReminder: true,
       weeklyReport: true,
@@ -31,6 +53,18 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
+    const theme = getStoredTheme();
+    setSettings((prev) => ({
+      ...prev,
+      appearance: {
+        ...prev.appearance,
+        theme,
+      },
+    }));
+    setThemeMode(theme);
+  }, []);
+
+  useEffect(() => {
     if (!token) {
       router.push('/login');
     }
@@ -38,25 +72,37 @@ export default function SettingsPage() {
 
   if (!token) return null;
 
-  const handleToggle = (section: string, key: string) => {
+  const handleToggle = (
+    section: 'notifications' | 'privacy' | 'audio',
+    key: 'dailyReminder' | 'weeklyReport' | 'achievementAlerts' | 'dataSharing' | 'autoSave'
+  ) => {
     setSettings((prev) => ({
       ...prev,
       [section]: {
-        ...prev[section as keyof typeof prev],
-        [key]: !prev[section as keyof typeof prev][key as any],
+        ...prev[section],
+        [key]: !((prev[section] as Record<string, boolean>)[key]),
       },
     }));
     toast.success('Setting updated');
   };
 
-  const handleSelectChange = (section: string, key: string, value: string) => {
+  const handleSelectChange = (
+    section: 'privacy' | 'audio' | 'appearance',
+    key: 'profileVisibility' | 'maxDuration' | 'quality' | 'theme' | 'accentColor',
+    value: string
+  ) => {
     setSettings((prev) => ({
       ...prev,
       [section]: {
-        ...prev[section as keyof typeof prev],
+        ...prev[section],
         [key]: value,
       },
     }));
+
+    if (section === 'appearance' && key === 'theme') {
+      setThemeMode(value as ThemeMode);
+    }
+
     toast.success('Setting updated');
   };
 

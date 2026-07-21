@@ -3,7 +3,8 @@ import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { Inter } from 'next/font/google';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { initializeTheme } from '@/lib/theme';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -19,6 +20,10 @@ export default function App({ Component, pageProps }: AppProps) {
         },
       })
   );
+
+  useEffect(() => {
+    initializeTheme();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
