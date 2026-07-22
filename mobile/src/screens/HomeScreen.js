@@ -14,6 +14,7 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+import { getJournalEntries } from '../services/journalStorage';
 
 const audioRecorderPlayer = new AudioRecorderPlayer();
 
@@ -38,8 +39,13 @@ const HomeScreen = ({ navigation }) => {
     loadRecentEntries();
     loadStreak();
 
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadRecentEntries();
+    });
+
     return () => {
       // Cleanup
+      unsubscribe();
       if (isRecording) {
         stopRecording();
       }
@@ -170,23 +176,26 @@ const HomeScreen = ({ navigation }) => {
 
   // Load recent entries from storage/API
   const loadRecentEntries = async () => {
-    // TODO: Implement API call to fetch recent entries
-    // Mock data for demonstration
-    const mockEntries = [
-      {
-        id: '1',
-        date: 'Nov 24',
-        tagline: 'Morning clarity',
+    try {
+      const entries = await getJournalEntries();
+      const recent = entries.slice(0, 3).map((entry) => ({
+        id: entry.id,
+        audioPath: entry.audioPath,
+        duration: entry.duration,
+        timestamp: entry.timestamp,
+        date: new Date(entry.createdAt).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+        tagline: entry.tagline || 'A moment of clarity',
         waveformData: [0.3, 0.7, 0.5, 0.8, 0.4, 0.6, 0.9, 0.3],
-      },
-      {
-        id: '2',
-        date: 'Nov 23',
-        tagline: 'Evening thoughts',
-        waveformData: [0.5, 0.4, 0.7, 0.6, 0.8, 0.3, 0.5, 0.7],
-      },
-    ];
-    setRecentEntries(mockEntries);
+      }));
+
+      setRecentEntries(recent);
+    } catch (error) {
+      console.error('Failed to load recent entries:', error);
+      setRecentEntries([]);
+    }
   };
 
   // Load streak from storage/API
@@ -199,7 +208,7 @@ const HomeScreen = ({ navigation }) => {
   const renderRecentEntry = ({ item }) => (
     <TouchableOpacity
       style={styles.entryCard}
-      onPress={() => navigation.navigate('PostRecording', { entryId: item.id })}
+      onPress={() => navigation.navigate('PostRecording', { entry: item })}
       activeOpacity={0.7}
     >
       <View style={styles.entryWaveform}>

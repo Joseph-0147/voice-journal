@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Home, BarChart3, Settings, User, BookOpen } from 'lucide-react';
+import { Home, BarChart3, Settings, User, BookOpen, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'Home' },
   { href: '/entries', icon: BookOpen, label: 'Entries' },
   { href: '/insights', icon: BarChart3, label: 'Insights' },
+  { href: '/assistant', icon: Sparkles, label: 'AI Assistant' },
   { href: '/profile', icon: User, label: 'Profile' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];

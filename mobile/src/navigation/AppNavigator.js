@@ -10,6 +10,7 @@ import PostRecordingScreen from '../screens/PostRecordingScreen';
 import InsightsDashboardScreen from '../screens/InsightsDashboardScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import AssistantScreen from '../screens/AssistantScreen';
 
 import { colors } from '../theme';
 
@@ -67,6 +68,15 @@ function MainTabs() {
         options={{
           tabBarIcon: ({ focused }) => (
             <Text style={{ fontSize: 24 }}>{focused ? '📊' : '📊'}</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="AI"
+        component={AssistantScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Text style={{ fontSize: 24 }}>{focused ? '✨' : '✨'}</Text>
           ),
         }}
       />

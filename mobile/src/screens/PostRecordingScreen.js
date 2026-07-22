@@ -16,18 +16,22 @@ import Share from 'react-native-share';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 import SoundscapeVisualizer from '../components/SoundscapeVisualizer';
 import AIService from '../services/AIService';
+import { saveJournalEntry } from '../services/journalStorage';
 
 const PostRecordingScreen = ({ route, navigation }) => {
-  const { audioPath, duration, timestamp } = route.params;
+  const routeEntry = route.params?.entry || null;
+  const audioPath = route.params?.audioPath || routeEntry?.audioPath || '';
+  const duration = route.params?.duration || routeEntry?.duration || '00:00';
+  const timestamp = route.params?.timestamp || routeEntry?.timestamp || routeEntry?.createdAt || new Date().toISOString();
   
   // State
-  const [tagline, setTagline] = useState('A moment of clarity');
+  const [tagline, setTagline] = useState(routeEntry?.tagline || 'A moment of clarity');
   const [isEditingTagline, setIsEditingTagline] = useState(false);
-  const [selectedGradient, setSelectedGradient] = useState('default');
+  const [selectedGradient, setSelectedGradient] = useState(routeEntry?.gradient || 'default');
   const [showThemePicker, setShowThemePicker] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(true);
-  const [insights, setInsights] = useState(null);
-  const [transcript, setTranscript] = useState('');
+  const [isProcessing, setIsProcessing] = useState(!routeEntry);
+  const [insights, setInsights] = useState(routeEntry?.insights || routeEntry?.analysis || null);
+  const [transcript, setTranscript] = useState(routeEntry?.transcript || '');
   
   // Refs
   const soundscapeRef = useRef();
@@ -42,8 +46,10 @@ const PostRecordingScreen = ({ route, navigation }) => {
       useNativeDriver: true,
     }).start();
 
-    // Process audio with AI
-    processAudio();
+    if (!routeEntry && audioPath) {
+      // Process audio with AI for brand-new recordings
+      processAudio();
+    }
   }, []);
 
   const processAudio = async () => {
@@ -101,8 +107,8 @@ const PostRecordingScreen = ({ route, navigation }) => {
 
   const handleSaveEntry = async () => {
     try {
-      // TODO: Save to backend/database
-      const entryData = {
+      const entryData = await saveJournalEntry({
+        id: routeEntry?.id,
         audioPath,
         duration,
         timestamp,
@@ -110,7 +116,8 @@ const PostRecordingScreen = ({ route, navigation }) => {
         gradient: selectedGradient,
         transcript,
         insights,
-      };
+        analysis: insights,
+      });
 
       // Show success feedback
       Alert.alert(
@@ -123,7 +130,7 @@ const PostRecordingScreen = ({ route, navigation }) => {
           },
           {
             text: 'Done',
-            onPress: () => navigation.navigate('Home'),
+            onPress: () => navigation.goBack(),
             style: 'cancel',
           },
         ]
